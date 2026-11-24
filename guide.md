@@ -1,11 +1,31 @@
 # LucidCode Guide
 
+<div align="center">
+
+![version](https://img.shields.io/badge/version-1.0.1-2dd4bf?style=for-the-badge)
+![electron](https://img.shields.io/badge/Electron-45-2dd4bf?style=for-the-badge)
+![node](https://img.shields.io/badge/Node-%E2%89%A522.12-339933?style=for-the-badge)
+![platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-7c5cff?style=for-the-badge)
+![license](https://img.shields.io/badge/License-MIT-f5c351?style=for-the-badge)
+
+[Demo](#demo) · [Plain English](#part-1--plain-english-guide) · [Frontend technologies](#frontend-technologies) · [Technical reference](#part-2--technical-reference)
+
+</div>
+
 This guide has two parts:
 
 1. **Plain-English guide** — for anyone who just wants to use LucidCode.
 2. **Technical reference** — for developers who want to know exactly what the code does.
 
-You do not need images or a video to follow either part.
+A short demo GIF is included below so you can see what was built before you read.
+
+---
+
+## Demo
+
+![LucidCode demo — open a project folder, ask Lucas AI to create a form, and review the generated file](demo.gif)
+
+The GIF shows the whole idea: install the app, ask for a simple contact form, watch the agent work through its steps, and review the finished `form.html`.
 
 ---
 
@@ -295,7 +315,27 @@ Other exported groups: `settings`, `extensions`, `sessions`, `getSession`, `crea
 
 The renderer subscribes to `agent:event` and updates the UI from typed events instead of reaching into Node APIs.
 
-## 10. Security boundaries
+## 10. Frontend technologies
+
+The user-facing side of LucidCode is built with these languages and libraries:
+
+| Layer | Language / technology | Where it is used |
+| --- | --- | --- |
+| Markup | **HTML5** | `renderer/index.html` — the app shell, panels, buttons, and message area |
+| Styling | **CSS3** | `renderer/style.css` — dark/light themes, layouts, and every UI component |
+| UI logic | **JavaScript (browser)** | `renderer/app.js` — chat, streaming updates, Markdown rendering, approval cards, file tree, sessions, and tasks |
+| Early theme | **JavaScript (inline)** | `renderer/theme-boot.js` — applies the saved theme before the first paint |
+| Desktop shell | **Electron 45** | `main.js`, `preload.js` — window, IPC bridge, menus, and service lifecycle |
+| Main-process code | **JavaScript (Node.js / CommonJS)** | `src/*.js` — agent loop, tools, router, storage, skills, and plugins |
+| Runtime | **Node.js 22.12+** | Runs the main process and the build tooling |
+| Markdown rendering | **Marked** (bundled) | Converts assistant Markdown into HTML |
+| HTML safety | **DOMPurify** (bundled) | Sanitizes rendered HTML before it reaches the page |
+| Code highlighting | **highlight.js** (bundled) | Colors code blocks in chat and previews |
+| Command execution | **PowerShell** | Used by the `run_command` tool inside the workspace |
+
+In short: the interface is **HTML + CSS + JavaScript**, running inside **Electron**, with **Node.js** behind it. All third-party renderer libraries are bundled locally, so the UI works offline.
+
+## 11. Security boundaries
 
 - `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`
 - Only the explicit `preload.js` API is exposed
@@ -306,13 +346,13 @@ The renderer subscribes to `agent:event` and updates the UI from typed events in
 - API keys are stored locally and sent only to the configured service URL
 - No telemetry
 
-## 11. Extensions
+## 12. Extensions
 
 - `src/skills.js` discovers Markdown skills in workspace/global skill folders and loads their instructions.
 - `src/plugins.js` reads local plugin manifests and contributes `plugin_*` tools.
 - Both are gathered at the start of an agent run and included in the system context.
 
-## 12. Build and release
+## 13. Build and release
 
 ```text
 npm run pack        # unpacked Windows app
@@ -322,7 +362,7 @@ npm run build:win / build:mac / build:linux
 
 `package.json` configures `electron-builder` for Windows NSIS and portable, macOS DMG/ZIP (x64 + arm64), and Linux DEB/tar.gz (x64 + arm64). `.github/workflows/build.yml` builds all combinations on `workflow_dispatch` and uploads artifacts.
 
-## 13. Quick file map
+## 14. Quick file map
 
 ```text
 main.js                    Electron shell, IPC, service lifecycle, agent run ownership
